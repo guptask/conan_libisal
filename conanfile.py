@@ -7,15 +7,14 @@ import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, CMake, tools
 
 
-class LibcurlConan(ConanFile):
-    name = "libcurl"
-    version = "7.60.0"
-    description = "command line tool and library for transferring data with URLs"
-    url = "http://github.com/bincrafters/conan-libcurl"
+class LibisalConan(ConanFile):
+    name = "libisal"
+    version = "2.21.0"
+    description = "Intel's Intelligent Storage Acceleration Library"
+    url = "http://github.com/bincrafters/conan-libisal"
     homepage = "https://github.com/01org/isa-l"
     license = "MIT"
     exports = ["LICENSE.md"]
-    exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt"]
     generators = "autotools"
     source_subfolder = "source_subfolder"
     settings = "os", "arch", "compiler", "build_type"
@@ -121,13 +120,8 @@ class LibcurlConan(ConanFile):
         self.requires.add("zlib/1.2.11@conan/stable")
 
     def source(self):
-        tools.get("https://curl.haxx.se/download/curl-%s.tar.gz" % self.version)
-        os.rename("curl-%s" % self.version, self.source_subfolder)
-        tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=False)
-        os.rename(os.path.join(self.source_subfolder, "CMakeLists.txt"),
-                  os.path.join(self.source_subfolder, "CMakeLists_original.txt"))
-        shutil.copy("CMakeLists.txt",
-                    os.path.join(self.source_subfolder, "CMakeLists.txt"))
+        tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
+        os.rename("%s-%s" % (self.name, self.version), self.source_subfolder)
 
     def build(self):
         self.patch_misc_files()
@@ -288,8 +282,8 @@ class LibcurlConan(ConanFile):
             return
         # patch autotools files
         with tools.chdir(self.source_subfolder):
-            # for mingw builds - do not compile curl tool, just library
-            # linking errors are much harder to fix than to exclude curl tool
+            # for mingw builds - do not compile isal tool, just library
+            # linking errors are much harder to fix than to exclude isal tool
             if self.version_components[0] == 7 and self.version_components[1] >= 55:
                 tools.replace_in_file("Makefile.am",
                                       'SUBDIRS = lib src',
@@ -311,14 +305,14 @@ class LibcurlConan(ConanFile):
             if self.options.shared:
                 # patch for shared mingw build
                 tools.replace_in_file(os.path.join('lib', 'Makefile.am'),
-                                      'noinst_LTLIBRARIES = libcurlu.la',
+                                      'noinst_LTLIBRARIES = libisalu.la',
                                       '')
                 tools.replace_in_file(os.path.join('lib', 'Makefile.am'),
                                       'noinst_LTLIBRARIES =',
                                       '')
                 tools.replace_in_file(os.path.join('lib', 'Makefile.am'),
-                                      'lib_LTLIBRARIES = libcurl.la',
-                                      'noinst_LTLIBRARIES = libcurl.la')
+                                      'lib_LTLIBRARIES = libisal.la',
+                                      'noinst_LTLIBRARIES = libisal.la')
                 # add directives to build dll
                 added_content = tools.load(os.path.join(self.source_folder, 'lib_Makefile_add.am'))
                 tools.save(os.path.join('lib', 'Makefile.am'), added_content, append=True)
@@ -365,7 +359,7 @@ class LibcurlConan(ConanFile):
                                           'LDFLAGS="$LDFLAGS `$PKGCONFIG --libs-only-L zlib`"')
 
                 self.run("chmod +x configure")
-                configure_args = self.get_configure_command_args()
+                #configure_args = self.get_configure_command_args()
                 autotools.configure(vars=autotools_vars, args=configure_args)
                 autotools.make(vars=autotools_vars)
                 autotools.install(vars=autotools_vars)
