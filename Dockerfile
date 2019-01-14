@@ -11,9 +11,7 @@ ENV CONAN_PASS=${CONAN_PASS:-password}
 ENV SOURCE_PATH=/tmp/source/
 
 COPY conanfile.py ${SOURCE_PATH}
-COPY CMakeLists.txt ${SOURCE_PATH}
 COPY test_package/ ${SOURCE_PATH}test_package
-COPY lib_Makefile_add.am ${SOURCE_PATH}
 COPY LICENSE.md ${SOURCE_PATH}
 
 WORKDIR /output
