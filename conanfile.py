@@ -7,7 +7,7 @@ from conans import tools
 import os
 
 class LibisalConan(ConanFile):
-    name = "libisal"
+    name = "isa-l"
     version = "2.21.0"
     description = "Intel's Intelligent Storage Acceleration Library"
     url = "https://github.com/bincrafters/conan-libisal"
@@ -31,6 +31,7 @@ class LibisalConan(ConanFile):
 
     def build(self):
         with tools.chdir(self.source_subfolder):
+            self.run("./autogen.sh")
             files.mkdir("_build")
             with tools.chdir("_build"):
                 env_build = AutoToolsBuildEnvironment(self)
@@ -44,6 +45,8 @@ class LibisalConan(ConanFile):
 
     def package(self):
         self.copy("*/isa-l.h", dst="include", keep_path=False)
+        self.copy("*/isa-l.h", dst="include/isa-l", keep_path=False)
+        self.copy("*.h", dst="include/isa-l", src="%s/include" % (self.source_subfolder) , keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.dylib", dst="lib", keep_path=False)
